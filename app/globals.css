@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f5f7fa;
+  --foreground: #101820;
+  --navy: #061a2e;
+  --navy-soft: #0b2b47;
+  --ocean: #0077b6;
+  --aqua: #00b4d8;
+  --mist: #eaf8ff;
+  --line: #dce7ef;
+  --muted: #5f6b7a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  overflow-x: clip;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100dvh;
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), Arial, sans-serif;
+  overflow-x: clip;
+  overflow-y: auto;
+}
+
+a {
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(0, 166, 214, 0.22);
+}
+
+.container-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+.section-pad {
+  padding-block: 72px;
+}
+
+.premium-card {
+  border: 1px solid rgba(6, 26, 46, 0.1);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 45px rgba(6, 26, 46, 0.08);
+}
+
+.navy-gradient {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(0, 180, 216, 0.18), transparent 30%),
+    linear-gradient(135deg, #061a2e 0%, #082a45 58%, #061a2e 100%);
+}
+
+.lane-pattern {
+  background-image:
+    linear-gradient(rgba(0, 180, 216, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 180, 216, 0.09) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.required-dot::after {
+  content: " *";
+  color: #dc2626;
+}
+
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus-ring:focus-visible {
+  outline-color: var(--aqua);
+}
+
+@media (min-width: 768px) {
+  .section-pad {
+    padding-block: 96px;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  main {
+    display: block;
+  }
+
+  .print-page {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

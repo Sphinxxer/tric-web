@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-label="About pool placeholder">
+  <linearGradient id="a" x1="0" x2="1"><stop stop-color="#061A2E"/><stop offset="1" stop-color="#0077B6"/></linearGradient>
+  <rect width="1200" height="900" fill="url(#a)"/>
+  <g stroke="#EAF8FF" stroke-width="6" opacity=".35">
+    <path d="M80 220h1040M80 360h1040M80 500h1040M80 640h1040"/>
+  </g>
+  <text x="80" y="120" font-family="Inter, Arial" font-size="34" font-weight="800" fill="#fff">TRIC 25m pool placeholder</text>
+</svg>
