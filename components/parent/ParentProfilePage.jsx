@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import ParentGuard from "@/components/parent/ParentGuard";
+import { useAuth } from "@/components/auth/AuthProvider";
 import {
   EMPTY_PARENT_PROFILE,
   getDemoParentProfile,
@@ -23,13 +24,15 @@ function fieldClass(error) {
 }
 
 export default function ParentProfilePage() {
+  const { user } = useAuth();
+  const parentId = user?.id || "demo-parent-parents";
   const [profile, setProfile] = useState(EMPTY_PARENT_PROFILE);
   const [errors, setErrors] = useState({});
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setProfile(getDemoParentProfile());
-  }, []);
+    setProfile(getDemoParentProfile(parentId));
+  }, [parentId]);
 
   function update(field, value) {
     setProfile((current) => ({ ...current, [field]: value }));
@@ -69,7 +72,7 @@ export default function ParentProfilePage() {
     event.preventDefault();
     if (!validate()) return;
 
-    saveDemoParentProfile(profile);
+    saveDemoParentProfile(profile, parentId);
     setSaved(true);
   }
 
@@ -86,8 +89,8 @@ export default function ParentProfilePage() {
                 Parent Profile
               </h1>
               <p className="mt-2 text-sm leading-6 text-[#5F6B7A]">
-                Save your contact details for demo applications. Later this will
-                connect to the Supabase profiles table.
+                Save your contact details so future applications are quicker to
+                complete.
               </p>
             </div>
             <Link

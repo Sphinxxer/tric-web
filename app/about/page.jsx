@@ -13,19 +13,19 @@ const poolImages = [
     className: "min-h-[320px] md:row-span-2 md:min-h-[520px]",
   },
   {
-    src: "/images/about/pool-1.jpg",
+    src: "/images/about/poolside.jpg",
     alt: "TRIC Sports Academy poolside image",
     label: "Poolside",
     className: "min-h-[165px]",
   },
   {
-    src: "/images/about/pool-2.jpg",
+    src: "/images/about/training.jpg",
     alt: "TRIC Sports Academy training image",
     label: "Training",
     className: "min-h-[165px]",
   },
   {
-    src: "/images/about/pool-3.jpg",
+    src: "/images/about/facility.jpg",
     alt: "TRIC Sports Academy facility image",
     label: "Facility",
     className: "min-h-[165px] md:col-span-2",
@@ -107,7 +107,7 @@ export default function AboutPage() {
           <SectionHeader
             eyebrow="Pool environment"
             title="Inside TRIC Sports Academy"
-            description="Replace these image paths with real academy photos when final media is ready."
+            description="A closer look at the pool, training spaces, and practical facilities that support swimmers and parents."
           />
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             {poolImages.map((image) => (
@@ -146,8 +146,7 @@ export default function AboutPage() {
                 </p>
                 <p className="mt-4 max-w-2xl text-base leading-7 text-slate-200">
                   For athletes who qualify, TRIC also supports the pathway toward
-                  higher-level competitive participation, including national-level
-                  participation opportunities.
+                  higher-level competitive participation.
                 </p>
                 <p className="mt-5 rounded-lg border border-white/14 bg-white/8 px-4 py-3 text-sm font-bold leading-6 text-cyan-50">
                   For students ready to take swimming seriously, TRIC provides a

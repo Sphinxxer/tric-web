@@ -2,9 +2,12 @@ import type {
   Application,
   ApplicationStatus,
   ApplicationType,
+  ParentDetails,
   PaymentStatus,
+  StudentDetails,
   StudentProfile,
 } from "@/types/demo";
+import { seedDemoApplicationsIfEmpty } from "./seed-demo-data";
 
 const STORE_KEY = "tric_demo_applications";
 
@@ -120,26 +123,59 @@ function normalizeApplication(input: unknown, index = 0): Application | null {
     age: stringValue(student.age, input.age),
     gender: stringValue(student.gender, input.gender),
   };
+  const normalizedParent = {
+    name: stringValue(parent.name, input.parentName, input.guardianName),
+    phone: stringValue(parent.phone, input.phone, input.parentPhone),
+    whatsapp: stringValue(parent.whatsapp, input.whatsapp, input.whatsappNumber),
+    email: stringValue(parent.email, input.email),
+    address: stringValue(parent.address, input.address),
+  };
+  const parentSnapshot = nestedRecord(input.parentSnapshot);
+  const studentSnapshot = nestedRecord(input.studentSnapshot);
   const normalized: Application = {
     id: stringValue(input.id) || makeId(),
     applicationNo:
       stringValue(input.applicationNo, input.referenceNo) ||
       makeApplicationNo(type, index),
+    parentId: stringValue(input.parentId) || "demo-parent-parents",
+    studentId:
+      stringValue(input.studentId, input.studentProfileId) ||
+      makeStudentProfileId({ student: normalizedStudent }),
     type,
+    applicationType: type,
     status: normalizeStatus(input.status),
     paymentStatus: normalizePaymentStatus(input.paymentStatus),
     adminNotes: stringValue(input.adminNotes),
     studentProfileId:
       stringValue(input.studentProfileId) ||
       makeStudentProfileId({ student: normalizedStudent }),
-    student: normalizedStudent,
-    parent: {
-      name: stringValue(parent.name, input.parentName, input.guardianName),
-      phone: stringValue(parent.phone, input.phone, input.parentPhone),
-      whatsapp: stringValue(parent.whatsapp, input.whatsapp, input.whatsappNumber),
-      email: stringValue(parent.email, input.email),
-      address: stringValue(parent.address, input.address),
+    studentSnapshot: {
+      fullName:
+        stringValue(studentSnapshot.fullName, normalizedStudent.fullName) ||
+        "Student not provided",
+      dateOfBirth: stringValue(studentSnapshot.dateOfBirth, normalizedStudent.dateOfBirth),
+      age: stringValue(studentSnapshot.age, normalizedStudent.age),
+      gender: stringValue(studentSnapshot.gender, normalizedStudent.gender),
+      swimmingExperience: stringValue(
+        studentSnapshot.swimmingExperience,
+        input.swimmingExperience,
+      ),
+      skillLevel: stringValue(studentSnapshot.skillLevel, input.skillLevel) as Application["health"]["skillLevel"],
+      medicalConcerns: stringValue(
+        studentSnapshot.medicalConcerns,
+        input.medicalConcerns,
+        input.medicalConditions,
+      ),
     },
+    parentSnapshot: {
+      name: stringValue(parentSnapshot.name, normalizedParent.name),
+      phone: stringValue(parentSnapshot.phone, normalizedParent.phone),
+      whatsapp: stringValue(parentSnapshot.whatsapp, normalizedParent.whatsapp),
+      email: stringValue(parentSnapshot.email, normalizedParent.email),
+      address: stringValue(parentSnapshot.address, normalizedParent.address),
+    },
+    student: normalizedStudent,
+    parent: normalizedParent,
     emergency: {
       name: stringValue(emergency.name, input.emergencyName),
       phone: stringValue(emergency.phone, input.emergencyPhone),
@@ -178,6 +214,7 @@ function normalizeApplication(input: unknown, index = 0): Application | null {
     termsAccepted: booleanValue(
       input.termsAccepted,
       input.declarationAccepted,
+      input.declarationAccepted,
       input.consentAccepted,
     ),
     submittedAt: timestampValue(input.submittedAt, input.createdAt),
@@ -188,11 +225,13 @@ function normalizeApplication(input: unknown, index = 0): Application | null {
     ...normalized,
     paymentStatus: normalized.paymentStatus || "Not Paid",
     adminNotes: normalized.adminNotes || "",
-    studentProfileId: normalized.studentProfileId || makeStudentProfileId(normalized),
+    studentId: normalized.studentId || normalized.studentProfileId || makeStudentProfileId(normalized),
+    studentProfileId: normalized.studentProfileId || normalized.studentId || makeStudentProfileId(normalized),
   };
 }
 
 export function getDemoApplications() {
+  seedDemoApplicationsIfEmpty();
   return safeParse(storage()?.getItem(STORE_KEY) || null);
 }
 
@@ -283,11 +322,25 @@ export function createDemoApplication(
   >,
 ) {
   const applications = getDemoApplications();
+  const applicationType = application.type || application.applicationType || "summer-class";
+  const program = application.program || {};
+  const duplicateBatch =
+    applicationType === "summer-class"
+      ? "preferredBatch" in program
+        ? program.preferredBatch
+        : ""
+      : "";
   const duplicate = applications.find(
     (item) =>
-      item.type === application.type &&
-      normalize(item.student.fullName) === normalize(application.student.fullName) &&
-      item.student.dateOfBirth === application.student.dateOfBirth,
+      item.type === applicationType &&
+      (application.parentId ? item.parentId === application.parentId : true) &&
+      (application.studentId
+        ? item.studentId === application.studentId || item.studentProfileId === application.studentId
+        : normalize(item.student.fullName) === normalize(application.student.fullName) &&
+          item.student.dateOfBirth === application.student.dateOfBirth) &&
+      (!duplicateBatch ||
+        !("preferredBatch" in item.program) ||
+        item.program.preferredBatch === duplicateBatch),
   );
 
   if (duplicate) {
@@ -301,11 +354,28 @@ export function createDemoApplication(
   const next: Application = {
     ...application,
     id: makeId(),
-    applicationNo: makeApplicationNo(application.type, applications.length),
+    applicationNo: makeApplicationNo(applicationType, applications.length),
+    type: applicationType,
+    applicationType,
     status: "New",
     paymentStatus: "Not Paid",
     adminNotes: "",
-    studentProfileId: makeStudentProfileId(application),
+    parentId: application.parentId || "demo-parent-parents",
+    studentId: application.studentId || makeStudentProfileId(application),
+    studentProfileId: application.studentId || makeStudentProfileId(application),
+    studentSnapshot:
+      application.studentSnapshot ||
+      ({
+        ...application.student,
+        swimmingExperience: application.health.previousExperience,
+        skillLevel: application.health.skillLevel,
+        medicalConcerns: application.health.medicalConcerns,
+      } as StudentDetails & {
+        swimmingExperience?: string;
+        skillLevel?: Application["health"]["skillLevel"];
+        medicalConcerns?: string;
+      }),
+    parentSnapshot: application.parentSnapshot || (application.parent as ParentDetails),
     submittedAt: now,
     updatedAt: now,
   };

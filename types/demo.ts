@@ -1,8 +1,10 @@
 export type UserRole = "parent" | "admin";
 
 export type DemoUser = {
+  id?: string;
   username: string;
   role: UserRole;
+  email?: string;
   loggedInAt: string;
 };
 
@@ -19,6 +21,7 @@ export type ApplicationStatus =
 export type PaymentStatus = "Not Paid" | "Pending" | "Partial" | "Paid";
 
 export type ParentProfile = {
+  id?: string;
   name: string;
   phone: string;
   whatsapp: string;
@@ -28,10 +31,16 @@ export type ParentProfile = {
 
 export type StudentProfile = {
   id: string;
+  parentId?: string;
   fullName: string;
   dateOfBirth: string;
   age: string;
   gender: string;
+  swimmingExperience?: string;
+  skillLevel?: "Beginner" | "Intermediate" | "Advanced" | "";
+  medicalConcerns?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type StudentDetails = {
@@ -75,11 +84,20 @@ export type MembershipProgramDetails = {
 export type Application = {
   id: string;
   applicationNo: string;
+  parentId?: string;
+  studentId?: string;
   type: ApplicationType;
+  applicationType?: ApplicationType;
   status: ApplicationStatus;
   paymentStatus: PaymentStatus;
   adminNotes: string;
   studentProfileId?: string;
+  studentSnapshot?: StudentDetails & {
+    swimmingExperience?: string;
+    skillLevel?: "Beginner" | "Intermediate" | "Advanced" | "";
+    medicalConcerns?: string;
+  };
+  parentSnapshot?: ParentDetails;
   student: StudentDetails;
   parent: ParentDetails;
   emergency: EmergencyDetails;

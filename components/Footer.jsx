@@ -16,7 +16,8 @@ export default function Footer() {
                 width={48}
                 height={48}
                 sizes="48px"
-                className="size-12 object-cover"
+                className="object-cover"
+                style={{ width: "48px", height: "48px" }}
               />
             </span>
             <div>

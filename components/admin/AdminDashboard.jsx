@@ -10,6 +10,8 @@ import {
   statusClass,
   typeLabel,
 } from "@/lib/demo-store/applications";
+import { getDemoParentAccounts } from "@/lib/demo-store/parents";
+import { getDemoStudents } from "@/lib/demo-store/students";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(
@@ -19,9 +21,13 @@ function formatDate(value) {
 
 export default function AdminDashboard() {
   const [applications, setApplications] = useState([]);
+  const [parentCount, setParentCount] = useState(0);
+  const [studentCount, setStudentCount] = useState(0);
 
   useEffect(() => {
     setApplications(getDemoApplications());
+    setParentCount(getDemoParentAccounts().length);
+    setStudentCount(getDemoStudents().length);
   }, []);
 
   const stats = useMemo(() => {
@@ -31,8 +37,6 @@ export default function AdminDashboard() {
       Reviewed: applications.filter((item) => item.status === "Reviewed").length,
       Approved: applications.filter((item) => item.status === "Approved").length,
       paymentPending: applications.filter((item) => item.paymentStatus === "Pending").length,
-      summer: applications.filter((item) => item.type === "summer-class").length,
-      membership: applications.filter((item) => item.type === "membership").length,
     };
   }, [applications]);
 
@@ -45,8 +49,8 @@ export default function AdminDashboard() {
             ["New", stats.New],
             ["Approved", stats.Approved],
             ["Payment Pending", stats.paymentPending],
-            ["Summer Class", stats.summer],
-            ["Membership", stats.membership],
+            ["Parent Accounts", parentCount],
+            ["Student Profiles", studentCount],
           ].map(([label, value]) => (
             <article
               key={label}
@@ -113,6 +117,12 @@ export default function AdminDashboard() {
                   >
                     View Application
                   </Link>
+                  <Link
+                    href={`/admin/applications/${application.id}/print`}
+                    className="focus-ring mt-2 inline-flex min-h-11 w-full items-center justify-center rounded-md border border-[#DDEAF3] bg-white px-4 text-sm font-black text-[#061A2E]"
+                  >
+                    Print A4
+                  </Link>
                 </article>
               ))
             ) : (
@@ -132,6 +142,7 @@ export default function AdminDashboard() {
                   <th className="px-4 py-3">Submitted</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Payment</th>
+                  <th className="px-4 py-3">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -171,11 +182,27 @@ export default function AdminDashboard() {
                           {application.paymentStatus}
                         </span>
                       </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/applications/${application.id}`}
+                            className="focus-ring rounded-md border border-[#DDEAF3] px-3 py-2 text-xs font-black text-[#061A2E] hover:bg-[#EAF8FF]"
+                          >
+                            View
+                          </Link>
+                          <Link
+                            href={`/admin/applications/${application.id}/print`}
+                            className="focus-ring rounded-md bg-[#061A2E] px-3 py-2 text-xs font-black text-white"
+                          >
+                            Print
+                          </Link>
+                        </div>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td className="px-4 py-6 text-[#5F6B7A]" colSpan={7}>
+                    <td className="px-4 py-6 text-[#5F6B7A]" colSpan={8}>
                       No applications submitted yet.
                     </td>
                   </tr>

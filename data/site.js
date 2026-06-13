@@ -36,23 +36,27 @@ export const navLinks = [
 export const stats = [
   {
     icon: Trophy,
-    value: "10+ Years",
-    label: "Coaching Experience",
+    value: "Nearly 500",
+    label: "Athletes Trained Every Year",
+    detail: "Training scale across beginner, membership, and competitive programs.",
   },
   {
     icon: Users,
-    value: "15,000+",
-    label: "Students Coached",
+    value: "220",
+    label: "Active Competitive Trainees",
+    detail: "Swimmers currently preparing for competition-focused training.",
   },
   {
     icon: Waves,
     value: "25m",
     label: "International-Standard Pool",
+    detail: "A full-length pool for learning, training, and regular practice.",
   },
   {
     icon: Clock,
     value: "5:30 AM - 7 PM",
     label: "Tuesday to Sunday",
+    detail: "Daily pool access window for classes, members, and planned visits.",
   },
 ];
 

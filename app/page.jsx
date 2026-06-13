@@ -15,6 +15,7 @@ const trainingProof = [
 ];
 
 const facilityPreview = [
+  "Water Filtration",
   "Changing Rooms",
   "Showers",
   "Parking",
@@ -81,8 +82,8 @@ export default function HomePage() {
                 </h2>
                 <p className="mt-4 text-base leading-7 text-slate-300">
                   TRIC trains swimmers across beginner, membership, and competitive
-                  programs - with structured coaching for athletes preparing for
-                  local and state-level competitions, and higher-level pathways for
+                  programs, with structured coaching for athletes preparing for
+                  local and state-level competitions and higher-level pathways for
                   swimmers who qualify.
                 </p>
                 <ButtonLink href="/programs" variant="secondary" className="mt-6">
@@ -94,12 +95,12 @@ export default function HomePage() {
                 {trainingProof.map(([value, label]) => (
                   <article
                     key={label}
-                    className="rounded-lg border border-[#DDEAF3] bg-white p-4 shadow-sm sm:p-5"
-                  >
-                    <p className="text-3xl font-black leading-tight text-[#061A2E] sm:text-[2.35rem]">
+                  className="rounded-lg border border-[#DDEAF3] bg-white p-4 shadow-sm"
+                >
+                    <p className="text-2xl font-black leading-tight text-[#061A2E] sm:text-[2.15rem]">
                       {value}
                     </p>
-                    <p className="mt-2 text-sm font-bold leading-5 text-[#475569]">
+                    <p className="mt-2 text-sm font-bold leading-5 text-[#334155]">
                       {label}
                     </p>
                   </article>
@@ -185,7 +186,7 @@ export default function HomePage() {
               View Facilities
             </ButtonLink>
           </div>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             {facilityPreview.map((title) => (
               <article
                 key={title}

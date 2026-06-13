@@ -38,6 +38,7 @@ export default function AdminApplicationsPage() {
         application.parent.name,
         application.parent.phone,
         application.parent.whatsapp,
+        application.parent.email,
         application.applicationNo,
       ]
         .join(" ")

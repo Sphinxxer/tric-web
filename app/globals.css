@@ -120,4 +120,9 @@ textarea {
     box-shadow: none !important;
     border: none !important;
   }
+
+  .avoid-print-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }

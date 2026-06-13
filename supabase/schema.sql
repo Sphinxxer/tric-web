@@ -18,6 +18,8 @@ create table if not exists public.profiles (
   full_name text,
   email text,
   phone text,
+  whatsapp text,
+  address text,
   avatar_url text,
   role text not null default 'parent',
   created_at timestamp with time zone not null default now(),
@@ -32,6 +34,9 @@ create table if not exists public.students (
   dob date not null,
   age integer,
   gender text,
+  swimming_experience text,
+  skill_level text,
+  medical_concerns text,
   created_at timestamp with time zone not null default now(),
   updated_at timestamp with time zone not null default now()
 );
@@ -41,6 +46,8 @@ create table if not exists public.applications (
   user_id uuid not null references auth.users(id) on delete cascade,
   student_id uuid not null references public.students(id) on delete cascade,
   application_type text not null,
+  parent_snapshot jsonb not null default '{}'::jsonb,
+  student_snapshot jsonb not null default '{}'::jsonb,
   status text not null default 'New',
   payment_status text not null default 'Not Paid',
   admin_notes text,
@@ -175,8 +182,8 @@ on public.admin_activity_log for select to authenticated
 using (public.is_admin());
 
 comment on table public.profiles is 'Future Supabase Auth profiles for TRIC parent and admin users.';
-comment on table public.students is 'Future student/member identity records.';
-comment on table public.applications is 'Future summer class and membership application records.';
+comment on table public.students is 'Future student identity records. Each student belongs to a parent profile/user.';
+comment on table public.applications is 'Future summer class and membership application records. Store parent/student snapshots so submitted forms remain historically accurate after profile edits.';
 comment on table public.admin_activity_log is 'Future admin status-change audit trail.';
 
 -- Future storage note:

@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
 import ParentGuard from "@/components/parent/ParentGuard";
 import {
+  APPLICATION_STATUSES,
   getDemoApplications,
   paymentStatusClass,
   statusClass,
@@ -17,17 +19,33 @@ function formatDate(value) {
 }
 
 export default function ParentApplicationsPage() {
+  const { user } = useAuth();
+  const parentId = user?.id || "demo-parent-parents";
   const [applications, setApplications] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
+  const [type, setType] = useState("");
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
-    setApplications(getDemoApplications());
+    setApplications(
+      getDemoApplications().filter((application) => application.parentId === parentId),
+    );
     const message = window.sessionStorage?.getItem("tric_demo_application_success");
     if (message) {
       setSuccessMessage(message);
       window.sessionStorage?.removeItem("tric_demo_application_success");
     }
-  }, []);
+  }, [parentId]);
+
+  const filtered = useMemo(
+    () =>
+      applications.filter(
+        (application) =>
+          (!type || application.type === type) &&
+          (!status || application.status === status),
+      ),
+    [applications, status, type],
+  );
 
   return (
     <ParentGuard>
@@ -56,10 +74,36 @@ export default function ParentApplicationsPage() {
             </p>
           ) : null}
 
+          <div className="mb-5 grid gap-3 rounded-lg border border-[#DDEAF3] bg-white p-4 shadow-sm sm:grid-cols-2">
+            <select
+              value={type}
+              onChange={(event) => setType(event.target.value)}
+              className="focus-ring min-h-11 rounded-md border border-slate-300 px-3 text-sm"
+              aria-label="Filter by application type"
+            >
+              <option value="">All application types</option>
+              <option value="summer-class">Summer Class</option>
+              <option value="membership">Membership</option>
+            </select>
+            <select
+              value={status}
+              onChange={(event) => setStatus(event.target.value)}
+              className="focus-ring min-h-11 rounded-md border border-slate-300 px-3 text-sm"
+              aria-label="Filter by application status"
+            >
+              <option value="">All statuses</option>
+              {APPLICATION_STATUSES.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="overflow-hidden rounded-lg border border-[#DDEAF3] bg-white shadow-sm">
             <div className="grid gap-3 p-4 md:hidden">
-              {applications.length ? (
-                applications.map((application) => (
+              {filtered.length ? (
+                filtered.map((application) => (
                   <article
                     key={application.id}
                     className="rounded-lg border border-[#DDEAF3] bg-[#F8FCFF] p-4"
@@ -102,7 +146,7 @@ export default function ParentApplicationsPage() {
                 ))
               ) : (
                 <p className="rounded-md border border-[#DDEAF3] bg-[#F8FCFF] p-4 text-sm font-bold text-[#5F6B7A]">
-                  No applications submitted yet.
+                  No applications found.
                 </p>
               )}
             </div>
@@ -120,8 +164,8 @@ export default function ParentApplicationsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {applications.length ? (
-                    applications.map((application) => (
+                  {filtered.length ? (
+                    filtered.map((application) => (
                       <tr key={application.id}>
                         <td className="px-4 py-3 font-black text-[#061A2E]">
                           {application.applicationNo}
@@ -166,7 +210,7 @@ export default function ParentApplicationsPage() {
                   ) : (
                     <tr>
                       <td className="px-4 py-6 text-[#5F6B7A]" colSpan={7}>
-                        No applications submitted yet.
+                        No applications found.
                       </td>
                     </tr>
                   )}

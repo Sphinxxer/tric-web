@@ -69,6 +69,22 @@ export default function AdminApplicationDetailPage({ id }) {
       status: values.status,
       paymentStatus: values.paymentStatus,
       adminNotes: values.adminNotes,
+      studentSnapshot: {
+        fullName: values.studentFullName,
+        dateOfBirth: values.dateOfBirth,
+        age: values.age,
+        gender: values.gender,
+        swimmingExperience: values.previousExperience,
+        skillLevel: values.skillLevel,
+        medicalConcerns: values.medicalConcerns,
+      },
+      parentSnapshot: {
+        name: values.parentName,
+        phone: values.phone,
+        whatsapp: values.whatsapp,
+        email: values.email,
+        address: values.address,
+      },
       student: {
         fullName: values.studentFullName,
         dateOfBirth: values.dateOfBirth,
@@ -108,7 +124,7 @@ export default function AdminApplicationDetailPage({ id }) {
     const result = updateDemoApplication(id, updated);
     if (result.ok) {
       setApplication(result.application);
-      setMessage("Application saved successfully.");
+      setMessage("Application updated successfully.");
     } else {
       setMessage(result.message);
     }
@@ -143,15 +159,33 @@ export default function AdminApplicationDetailPage({ id }) {
             <div className="grid gap-5">
               <section className="rounded-lg border border-[#DDEAF3] bg-white p-5 shadow-sm">
                 <p className="text-xs font-black uppercase tracking-[0.16em] text-[#0077B6]">
-                  {typeLabel(application.type)}
+                  Application Overview
                 </p>
                 <h2 className="mt-2 text-2xl font-black text-[#061A2E]">
                   {application.student.fullName}
                 </h2>
-                <p className="mt-2 text-sm text-[#5F6B7A]">
-                  {application.applicationNo} | Submitted{" "}
-                  {formatDate(application.submittedAt)}
-                </p>
+                <div className="mt-3 grid gap-2 text-sm text-[#5F6B7A] sm:grid-cols-2">
+                  <p>
+                    <span className="font-black text-[#061A2E]">Type:</span>{" "}
+                    {typeLabel(application.type)}
+                  </p>
+                  <p>
+                    <span className="font-black text-[#061A2E]">Reference:</span>{" "}
+                    {application.applicationNo}
+                  </p>
+                  <p>
+                    <span className="font-black text-[#061A2E]">Submitted:</span>{" "}
+                    {formatDate(application.submittedAt)}
+                  </p>
+                  <p>
+                    <span className="font-black text-[#061A2E]">Current status:</span>{" "}
+                    {application.status}
+                  </p>
+                  <p>
+                    <span className="font-black text-[#061A2E]">Payment status:</span>{" "}
+                    {application.paymentStatus}
+                  </p>
+                </div>
               </section>
 
               <section className="rounded-lg border border-[#DDEAF3] bg-white p-5 shadow-sm">
@@ -176,10 +210,16 @@ export default function AdminApplicationDetailPage({ id }) {
               </section>
 
               <section className="rounded-lg border border-[#DDEAF3] bg-white p-5 shadow-sm">
-                <h3 className="text-lg font-black text-[#061A2E]">Emergency & Health</h3>
+                <h3 className="text-lg font-black text-[#061A2E]">Emergency Contact</h3>
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                   {input("emergencyName", "Emergency contact")}
                   {input("emergencyPhone", "Emergency phone", "tel")}
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-[#DDEAF3] bg-white p-5 shadow-sm">
+                <h3 className="text-lg font-black text-[#061A2E]">Health & Experience</h3>
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
                   {input("medicalConcerns", "Medical concerns")}
                   {input("previousExperience", "Previous experience")}
                   {input("skillLevel", "Skill level")}
@@ -187,7 +227,7 @@ export default function AdminApplicationDetailPage({ id }) {
               </section>
 
               <section className="rounded-lg border border-[#DDEAF3] bg-white p-5 shadow-sm">
-                <h3 className="text-lg font-black text-[#061A2E]">Program Details</h3>
+                <h3 className="text-lg font-black text-[#061A2E]">Program Preference</h3>
                 <div className="mt-4 grid gap-4 md:grid-cols-3">
                   {application.type === "summer-class" ? (
                     <>
@@ -204,10 +244,17 @@ export default function AdminApplicationDetailPage({ id }) {
                   )}
                 </div>
               </section>
+
+              <section className="rounded-lg border border-[#DDEAF3] bg-white p-5 shadow-sm">
+                <h3 className="text-lg font-black text-[#061A2E]">Declaration</h3>
+                <p className="mt-2 text-sm font-bold text-[#5F6B7A]">
+                  Accepted: {application.termsAccepted ? "Yes" : "No"}
+                </p>
+              </section>
             </div>
 
             <aside className="h-fit rounded-lg border border-[#DDEAF3] bg-white p-5 shadow-sm lg:sticky lg:top-24">
-              <h3 className="text-lg font-black text-[#061A2E]">Admin Actions</h3>
+              <h3 className="text-lg font-black text-[#061A2E]">Admin Controls</h3>
               <label className="mt-4 grid gap-2">
                 <span className="text-sm font-black text-[#061A2E]">Status</span>
                 <select
@@ -270,10 +317,10 @@ export default function AdminApplicationDetailPage({ id }) {
                   Print A4
                 </Link>
                 <Link
-                  href="/admin/dashboard"
+                  href="/admin/applications"
                   className="focus-ring rounded-md border border-[#DDEAF3] px-4 py-3 text-center text-sm font-black text-[#061A2E] hover:bg-[#EAF8FF]"
                 >
-                  Back to Dashboard
+                  Back to Applications
                 </Link>
               </div>
             </aside>

@@ -85,6 +85,44 @@ export default function Header() {
     );
   }
 
+  function renderMobileQuickAction() {
+    if (loading) return null;
+
+    if (isParent) {
+      return (
+        <Link
+          href="/parent/dashboard"
+          onClick={() => setOpen(false)}
+          className="focus-ring ml-auto inline-flex min-h-10 shrink-0 items-center rounded-md bg-[#061A2E] px-2.5 text-[0.7rem] font-black text-white min-[375px]:px-3 min-[375px]:text-xs sm:hidden"
+        >
+          Dashboard
+        </Link>
+      );
+    }
+
+    if (user && isAdmin) {
+      return (
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="focus-ring ml-auto inline-flex min-h-10 shrink-0 items-center rounded-md border border-[#DDEAF3] px-2.5 text-[0.7rem] font-black text-[#061A2E] min-[375px]:px-3 min-[375px]:text-xs sm:hidden"
+        >
+          Logout
+        </button>
+      );
+    }
+
+    return (
+      <Link
+        href="/login"
+        onClick={() => setOpen(false)}
+        className="focus-ring ml-auto inline-flex min-h-10 shrink-0 items-center rounded-md bg-[#061A2E] px-2.5 text-[0.7rem] font-black text-white min-[375px]:px-3 min-[375px]:text-xs sm:hidden"
+      >
+        Login
+      </Link>
+    );
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 text-[#061A2E] shadow-sm backdrop-blur">
       <div className="container-shell flex min-h-16 items-center justify-between gap-3">
@@ -100,7 +138,8 @@ export default function Header() {
               width={44}
               height={44}
               sizes="44px"
-              className="size-11 object-cover"
+              className="object-cover"
+              style={{ width: "44px", height: "44px" }}
               priority
             />
           </span>
@@ -136,6 +175,8 @@ export default function Header() {
         <div className="ml-auto hidden items-center gap-2 sm:flex lg:ml-0">
           {renderAuthActions()}
         </div>
+
+        {renderMobileQuickAction()}
 
         <button
           type="button"

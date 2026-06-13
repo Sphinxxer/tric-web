@@ -3,18 +3,16 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
 import ParentGuard from "@/components/parent/ParentGuard";
 import { createDemoApplication } from "@/lib/demo-store/applications";
 import {
   getDemoParentProfile,
   saveDemoParentProfile,
 } from "@/lib/demo-store/parentProfile";
+import { getDemoStudents } from "@/lib/demo-store/students";
 
 const baseInitial = {
-  studentFullName: "",
-  dateOfBirth: "",
-  age: "",
-  gender: "",
   parentName: "",
   phone: "",
   whatsapp: "",
@@ -41,31 +39,26 @@ function fieldClass(error) {
   }`;
 }
 
-function calculateAge(dateOfBirth) {
-  if (!dateOfBirth) return "";
-  const birthDate = new Date(dateOfBirth);
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age -= 1;
-  }
-
-  return Number.isFinite(age) && age >= 0 ? String(age) : "";
-}
-
 export default function ParentApplicationForm({ type }) {
   const router = useRouter();
+  const { user } = useAuth();
+  const parentId = user?.id || "demo-parent-parents";
   const isSummer = type === "summer-class";
   const [values, setValues] = useState(baseInitial);
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
+  const [students, setStudents] = useState([]);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
 
   const title = isSummer ? "Summer Class Application" : "Membership Application";
+  const selectedStudent =
+    students.find((student) => student.id === selectedStudentId) || null;
 
   useEffect(() => {
-    const profile = getDemoParentProfile();
+    const profile = getDemoParentProfile(parentId);
+    const savedStudents = getDemoStudents(parentId);
+    setStudents(savedStudents);
+    setSelectedStudentId((current) => current || savedStudents[0]?.id || "");
     setValues((current) => ({
       ...current,
       parentName: profile.name || current.parentName,
@@ -74,13 +67,24 @@ export default function ParentApplicationForm({ type }) {
       email: profile.email || current.email,
       address: profile.address || current.address,
     }));
-  }, []);
+  }, [parentId]);
+
+  useEffect(() => {
+    if (!selectedStudent) return;
+    setValues((current) => ({
+      ...current,
+      previousExperience:
+        current.previousExperience || selectedStudent.swimmingExperience || "",
+      skillLevel: current.skillLevel || selectedStudent.skillLevel || "",
+      medicalConcerns:
+        current.medicalConcerns || selectedStudent.medicalConcerns || "",
+    }));
+  }, [selectedStudent]);
 
   function update(field, value) {
     setValues((current) => ({
       ...current,
       [field]: value,
-      ...(field === "dateOfBirth" ? { age: calculateAge(value) } : {}),
     }));
     setErrors((current) => ({ ...current, [field]: "" }));
     setMessage("");
@@ -88,10 +92,6 @@ export default function ParentApplicationForm({ type }) {
 
   function validate() {
     const required = [
-      "studentFullName",
-      "dateOfBirth",
-      "age",
-      "gender",
       "parentName",
       "phone",
       "whatsapp",
@@ -110,6 +110,10 @@ export default function ParentApplicationForm({ type }) {
     }
 
     const nextErrors = {};
+    if (!selectedStudentId) {
+      nextErrors.selectedStudentId = "Please select a student before submitting.";
+    }
+
     required.forEach((field) => {
       if (!String(values[field] || "").trim()) {
         nextErrors[field] = "Please complete this field.";
@@ -153,13 +157,37 @@ export default function ParentApplicationForm({ type }) {
       return;
     }
 
+    if (!selectedStudent) {
+      setMessage("Please select a student before submitting.");
+      return;
+    }
+
     const result = createDemoApplication({
+      parentId,
+      studentId: selectedStudent.id,
       type,
+      applicationType: type,
+      studentSnapshot: {
+        fullName: selectedStudent.fullName,
+        dateOfBirth: selectedStudent.dateOfBirth,
+        age: selectedStudent.age,
+        gender: selectedStudent.gender,
+        swimmingExperience: selectedStudent.swimmingExperience || "",
+        skillLevel: selectedStudent.skillLevel || "",
+        medicalConcerns: selectedStudent.medicalConcerns || "",
+      },
+      parentSnapshot: {
+        name: values.parentName,
+        phone: values.phone,
+        whatsapp: values.whatsapp,
+        email: values.email,
+        address: values.address,
+      },
       student: {
-        fullName: values.studentFullName,
-        dateOfBirth: values.dateOfBirth,
-        age: values.age,
-        gender: values.gender,
+        fullName: selectedStudent.fullName,
+        dateOfBirth: selectedStudent.dateOfBirth,
+        age: selectedStudent.age,
+        gender: selectedStudent.gender,
       },
       parent: {
         name: values.parentName,
@@ -197,12 +225,13 @@ export default function ParentApplicationForm({ type }) {
     }
 
     saveDemoParentProfile({
+      id: parentId,
       name: values.parentName,
       phone: values.phone,
       whatsapp: values.whatsapp,
       email: values.email,
       address: values.address,
-    });
+    }, parentId);
 
     window.sessionStorage?.setItem("tric_demo_application_success", SUCCESS_MESSAGE);
     router.push("/parent/applications");
@@ -265,8 +294,8 @@ export default function ParentApplicationForm({ type }) {
               </p>
               <h1 className="mt-2 text-3xl font-black text-[#061A2E]">{title}</h1>
               <p className="mt-2 text-sm leading-6 text-[#5F6B7A]">
-                Fill the required details. This demo stores applications locally in
-                the browser.
+                Fill the required details. Your submitted application will appear in
+                the parent portal for status tracking.
               </p>
             </div>
             <Link
@@ -279,20 +308,77 @@ export default function ParentApplicationForm({ type }) {
 
           <form onSubmit={submit} className="grid gap-5">
             <section className="rounded-lg border border-[#DDEAF3] bg-white p-5 shadow-sm">
-              <h2 className="text-xl font-black text-[#061A2E]">Student Details</h2>
-              <div className="mt-4 grid gap-4 md:grid-cols-2">
-                {input("studentFullName", "Student full name")}
-                {input("dateOfBirth", "Date of birth", "date")}
-                {input("age", "Age", "number")}
-                {select("gender", "Gender", ["Male", "Female", "Prefer not to say"])}
-              </div>
+              <h2 className="text-xl font-black text-[#061A2E]">Selected Student</h2>
+              {students.length ? (
+                <div className="mt-4 grid gap-4 md:grid-cols-[1fr_1.2fr]">
+                  <label className="grid gap-2" htmlFor="selectedStudentId">
+                    <span className="text-sm font-black text-[#061A2E]">
+                      Select student <span className="text-red-600">*</span>
+                    </span>
+                    <select
+                      id="selectedStudentId"
+                      value={selectedStudentId}
+                      onChange={(event) => {
+                        setSelectedStudentId(event.target.value);
+                        setErrors((current) => ({ ...current, selectedStudentId: "" }));
+                      }}
+                      className={fieldClass(errors.selectedStudentId)}
+                    >
+                      <option value="">Choose a student</option>
+                      {students.map((student) => (
+                        <option key={student.id} value={student.id}>
+                          {student.fullName}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.selectedStudentId ? (
+                      <span className="text-xs font-bold text-red-600">
+                        {errors.selectedStudentId}
+                      </span>
+                    ) : null}
+                  </label>
+                  {selectedStudent ? (
+                    <div className="rounded-md border border-[#DDEAF3] bg-[#F8FCFF] p-4 text-sm">
+                      <h3 className="font-black text-[#061A2E]">
+                        {selectedStudent.fullName}
+                      </h3>
+                      <p className="mt-2 text-[#5F6B7A]">
+                        DOB: {selectedStudent.dateOfBirth || "-"} | Age:{" "}
+                        {selectedStudent.age || "-"} | Gender:{" "}
+                        {selectedStudent.gender || "-"}
+                      </p>
+                      <p className="mt-1 text-[#5F6B7A]">
+                        Skill: {selectedStudent.skillLevel || "-"}
+                      </p>
+                      <Link
+                        href="/parent/students"
+                        className="focus-ring mt-3 inline-flex rounded-md border border-[#DDEAF3] bg-white px-3 py-2 text-xs font-black text-[#061A2E] hover:bg-[#EAF8FF]"
+                      >
+                        Change Student
+                      </Link>
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-sm font-bold leading-6 text-amber-800">
+                    You need to add a student profile before submitting an application.
+                  </p>
+                  <Link
+                    href="/parent/students/new"
+                    className="focus-ring mt-3 inline-flex min-h-11 items-center rounded-md bg-[#061A2E] px-4 text-sm font-black text-white"
+                  >
+                    Add Student
+                  </Link>
+                </div>
+              )}
             </section>
 
             <section className="rounded-lg border border-[#DDEAF3] bg-white p-5 shadow-sm">
               <h2 className="text-xl font-black text-[#061A2E]">Parent Details</h2>
               <p className="mt-2 text-sm leading-6 text-[#5F6B7A]">
-                These details can later auto-fill from the parent profile after
-                Supabase Auth is connected.
+                These details can be reused from your parent profile to make future
+                applications faster.
               </p>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 {input("parentName", "Parent / guardian name")}

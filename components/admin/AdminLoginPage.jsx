@@ -1,22 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { demoCredentialsFor } from "@/lib/auth/demoAuth";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const { login, loading, isAdmin } = useAuth();
   const [error, setError] = useState("");
   const credentials = demoCredentialsFor("admin");
+  const showDemoCredentials =
+    process.env.NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS === "true";
 
   useEffect(() => {
     if (!loading && isAdmin) {
-      router.replace("/admin/dashboard");
+      window.location.replace("/admin/dashboard");
     }
-  }, [isAdmin, loading, router]);
+  }, [isAdmin, loading]);
 
   function submit(event) {
     event.preventDefault();
@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
       return;
     }
 
-    router.replace("/admin/dashboard");
+    window.location.assign("/admin/dashboard");
   }
 
   return (
@@ -49,7 +49,8 @@ export default function AdminLoginPage() {
                 alt="TRIC Sports Academy logo"
                 width={48}
                 height={48}
-                className="size-12 object-cover"
+                className="object-cover"
+                style={{ width: "48px", height: "48px" }}
               />
             </span>
             <div>
@@ -67,16 +68,20 @@ export default function AdminLoginPage() {
             A4 forms.
           </p>
 
-          <div className="mt-5 rounded-md border border-[#DDEAF3] bg-[#EAF8FF] p-3 text-sm font-bold text-[#061A2E]">
-            Demo: Username <span className="font-black">{credentials.username}</span>,
-            Password <span className="font-black">{credentials.password}</span>
-          </div>
+          {showDemoCredentials ? (
+            <div className="mt-5 rounded-md border border-[#DDEAF3] bg-[#EAF8FF] p-3 text-sm font-bold text-[#061A2E]">
+              Demo: Username{" "}
+              <span className="font-black">{credentials.username}</span>, Password{" "}
+              <span className="font-black">{credentials.password}</span>
+            </div>
+          ) : null}
 
           <label className="mt-6 grid gap-2">
-            <span className="text-sm font-black text-[#061A2E]">Username</span>
+            <span className="text-sm font-black text-[#061A2E]">Admin Username</span>
             <input
               name="username"
               required
+              autoComplete="username"
               className="focus-ring min-h-12 rounded-md border border-slate-300 px-3 text-sm"
             />
           </label>

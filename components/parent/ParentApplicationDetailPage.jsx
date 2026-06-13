@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
 import ParentGuard from "@/components/parent/ParentGuard";
 import {
   getDemoApplication,
@@ -29,11 +30,14 @@ function Detail({ label, value }) {
 }
 
 export default function ParentApplicationDetailPage({ id }) {
+  const { user } = useAuth();
+  const parentId = user?.id || "demo-parent-parents";
   const [application, setApplication] = useState(null);
 
   useEffect(() => {
-    setApplication(getDemoApplication(id));
-  }, [id]);
+    const record = getDemoApplication(id);
+    setApplication(record?.parentId === parentId ? record : null);
+  }, [id, parentId]);
 
   return (
     <ParentGuard>

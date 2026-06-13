@@ -13,7 +13,7 @@ const inter = Inter({
 export const metadata = {
   title: "TRIC Sports Academy | Professional Swimming Academy in Tirupur",
   description:
-    "Learn swimming at TRIC Sports Academy in Tirupur with a 25m pool, 10+ years of coaching, summer classes, regular memberships, and hourly pool access.",
+    "Learn swimming at TRIC Sports Academy in Tirupur with a 25m pool, summer classes, regular memberships, hourly access, and competitive training pathways.",
 };
 
 export default function RootLayout({ children }) {

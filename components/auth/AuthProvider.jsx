@@ -8,7 +8,12 @@ import {
   useMemo,
   useState,
 } from "react";
-import { getDemoUser, loginDemoUser, logoutDemoUser } from "@/lib/auth/demoAuth";
+import {
+  getDemoUser,
+  loginDemoUser,
+  logoutDemoUser,
+  signupDemoParent,
+} from "@/lib/auth/demoAuth";
 
 const AuthContext = createContext(null);
 
@@ -43,6 +48,14 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const signupParent = useCallback((input) => {
+    const result = signupDemoParent(input);
+    if (result.ok) {
+      setUser(result.user);
+    }
+    return result;
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -50,9 +63,10 @@ export function AuthProvider({ children }) {
       isParent: user?.role === "parent",
       isAdmin: user?.role === "admin",
       login,
+      signupParent,
       logout,
     }),
-    [loading, login, logout, user],
+    [loading, login, logout, signupParent, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -7,12 +7,12 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import ParentGuard from "@/components/parent/ParentGuard";
 import {
   getDemoApplications,
-  getDemoStudentProfiles,
   paymentStatusClass,
   statusClass,
   typeLabel,
 } from "@/lib/demo-store/applications";
 import { getDemoParentProfile } from "@/lib/demo-store/parentProfile";
+import { getDemoStudents } from "@/lib/demo-store/students";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(
@@ -22,16 +22,19 @@ function formatDate(value) {
 
 export default function ParentDashboard() {
   const router = useRouter();
-  const { logout: endSession } = useAuth();
+  const { user, logout: endSession } = useAuth();
+  const parentId = user?.id || "demo-parent-parents";
   const [applications, setApplications] = useState([]);
   const [students, setStudents] = useState([]);
   const [parentProfile, setParentProfile] = useState(null);
 
   useEffect(() => {
-    setApplications(getDemoApplications());
-    setStudents(getDemoStudentProfiles());
-    setParentProfile(getDemoParentProfile());
-  }, []);
+    setApplications(
+      getDemoApplications().filter((application) => application.parentId === parentId),
+    );
+    setStudents(getDemoStudents(parentId));
+    setParentProfile(getDemoParentProfile(parentId));
+  }, [parentId]);
 
   function logout() {
     endSession();
@@ -43,12 +46,13 @@ export default function ParentDashboard() {
       ? parentProfile
       : null;
   const latestParent = savedParent || applications[0]?.parent || {
-    name: "Parent demo user",
+    name: user?.username || "Parent demo user",
     phone: "Not added yet",
     whatsapp: "Not added yet",
     email: "Not added yet",
-    address: "Submit an application to save profile details.",
+    address: "",
   };
+  const needsAddress = !String(latestParent.address || "").trim();
 
   return (
     <ParentGuard>
@@ -63,7 +67,7 @@ export default function ParentDashboard() {
                 Welcome to TRIC
               </h1>
               <p className="mt-2 text-sm leading-6 text-[#5F6B7A]">
-                Start a new application or review applications submitted in demo mode.
+                Start a new application or review your submitted application status.
               </p>
             </div>
             <button
@@ -87,20 +91,28 @@ export default function ParentDashboard() {
                 <p><span className="font-black text-[#061A2E]">Phone:</span> {latestParent.phone || "Not added yet"}</p>
                 <p><span className="font-black text-[#061A2E]">WhatsApp:</span> {latestParent.whatsapp || "Not added yet"}</p>
                 <p><span className="font-black text-[#061A2E]">Email:</span> {latestParent.email || "Not added yet"}</p>
-                <p><span className="font-black text-[#061A2E]">Address:</span> {latestParent.address || "Not added yet"}</p>
+                <p>
+                  <span className="font-black text-[#061A2E]">Address:</span>{" "}
+                  {latestParent.address || "Complete your profile before submitting applications."}
+                </p>
               </div>
+              {needsAddress ? (
+                <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold leading-6 text-amber-800">
+                  Complete your profile before submitting applications.
+                </p>
+              ) : null}
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link
                   href="/parent/profile"
                   className="focus-ring rounded-md bg-[#061A2E] px-3 py-2 text-xs font-black text-white"
                 >
-                  Edit Profile
+                  {needsAddress ? "Complete Profile" : "Edit Profile"}
                 </Link>
                 <Link
-                  href="/parent/students"
+                  href={students.length ? "/parent/students" : "/parent/students/new"}
                   className="focus-ring rounded-md border border-[#DDEAF3] px-3 py-2 text-xs font-black text-[#061A2E] hover:bg-[#EAF8FF]"
                 >
-                  View Students
+                  {students.length ? "View Students" : "Add Student"}
                 </Link>
               </div>
             </section>
@@ -115,19 +127,20 @@ export default function ParentDashboard() {
               <div className="mt-4 grid gap-3">
                 {students.length ? (
                   students.map((student) => (
-                    <div
+                    <Link
                       key={student.id}
+                      href={`/parent/students/${student.id}`}
                       className="rounded-md border border-[#DDEAF3] bg-[#F8FCFF] p-3"
                     >
                       <p className="font-black text-[#061A2E]">{student.fullName}</p>
                       <p className="mt-1 text-sm text-[#5F6B7A]">
                         DOB: {student.dateOfBirth || "-"} | Age: {student.age || "-"}
                       </p>
-                    </div>
+                    </Link>
                   ))
                 ) : (
                   <p className="rounded-md border border-[#DDEAF3] bg-[#F8FCFF] p-3 text-sm font-bold text-[#5F6B7A]">
-                    No student profiles yet. Submit an application to create one.
+                    No student profiles yet. Add a student to start an application.
                   </p>
                 )}
               </div>
